@@ -10,7 +10,12 @@ def id3():
     # df = df._get_numeric_data()
     # numeric_headers = list(df.columns.values)
 
-    display(df.head(8377))
+    with pandas.option_context('display.max_rows', 8377,
+                               'display.max_columns', None,
+                               'display.width', 8377,
+                               'display.precision', 3,
+                               'display.colheader_justify', 'left'):
+        display(df.head(1000))
 
 
 # run script
