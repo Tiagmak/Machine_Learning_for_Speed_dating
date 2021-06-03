@@ -10,38 +10,26 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-'''
-from sklearn.tree import export_graphviz
-# from sklearn.externals.six import StringIO
-from IPython.display import Image
-import pydotplus
-'''
-# load file
-input_file = "speedDating_trab.csv"
-df = pandas.read_csv(input_file, header=0)
-headers = list(df.columns.values)
-'''
-df = df[df.columns.difference(['Unnamed: 0'])]
-# eliminate all NaN values
-# df.dropna(inplace=True)
-'''
+pima = pandas.read_csv("speedDating_trab.csv")
 
 
-def print_table(table):
+def print_table():
+    global pima
     with pandas.option_context('display.max_rows', 8377,
                                'display.max_columns', None,
                                'display.width', 8377,
                                'display.precision', 3,
                                'display.colheader_justify', 'left'):
-        display(table.head(10))
+        display(pima.head(10))
 
 
 # let's get 1's and 0's for global entropy
 # function for entropy
-def entropy(table):
+def entropy():
+    global pima
     one = 0
     zero = 0
-    for index, rows in table.iterrows():
+    for index, rows in pima.iterrows():
         # print(rows['match'])
         if rows['match'] == 0.0:
             zero = zero + 1
@@ -76,23 +64,25 @@ def normal_dist(x, mean, sd):
 # see the "making predictions" chapter in cmu-lecture-22.pdf
 # https://en.wikipedia.org/wiki/Probability_density_function
 # https://en.wikipedia.org/wiki/File:Visualisation_mode_median_mean.svg
-def magic_number(table, column_name):
+def magic_number(column_name):
+    global pima
     # Calculate mean and Standard deviation.
-    mean = np.mean(table[column_name])
-    sd = np.std(table[column_name])
+    mean = np.mean(pima[column_name])
+    sd = np.std(pima[column_name])
 
     # Apply function to the data.
-    pdf = normal_dist(table[column_name], mean, sd)
+    pdf = normal_dist(pima[column_name], mean, sd)
     return median(pdf)
 
 
-def entropy_non_bool(table, column_name):
-    magic_n = magic_number(table, column_name)
+def entropy_non_bool(column_name):
+    global pima
+    magic_n = magic_number(column_name)
 
     n = 0.0
     p = 0.0
 
-    for n in table[column_name]:
+    for n in pima[column_name]:
         # print(rows['match'])
         if n <= magic_n:
             n = n + 1
@@ -106,49 +96,48 @@ def entropy_non_bool(table, column_name):
     return fp - sp
 
 
-###########################################################
-###########################################################
-def replace_with_median(pima, column):
-    h_nm = headers
-    h_nm.remove('match')
-    h_nm.remove('Unnamed: 0')
-    median_n = magic_number(pima, column)
-
+def replace_with_median(column):
+    global pima
+    median_n = magic_number(column)
     for index, rows in pima.iterrows():
         if rows[column] == 'NA':
-            rows[column] = median_n
+            pima.rows[column] = median_n
 
     return pima
 
 
-def replace_with_partner(pima, column):
-    h_nm = headers
-    h_nm.remove('match')
-    h_nm.remove('Unnamed: 0')
-
+def replace_with_partner(column):
+    global pima
     for index, rows in pima.iterrows():
         if rows['match'] == 1:
             if rows[column] == 'NA':
-                partner_value = (pima.loc[pima[column] == pima.index.age])
-                rows[column] = partner_value
-        else:
-            pima.drop(pima.index)
+                partner_value = (pima.loc[pima[column] == pima.index.column])
+                pima.rows[column] = partner_value
+
+    return pima
+
+
+def eliminate_undefined_no_match(column):
+    global pima
+    for index, rows in pima.iterrows():
+        if rows['match'] == 0:
+            if rows[column] == 'NA':
+                pima = pima.drop([index])
 
     return pima
 
 
 def id3_auto():
-    pima = pandas.read_csv("speedDating_trab.csv")
-    pima.head()
-    # pima = pima.iloc[1:]
-    pima = pima[pima.columns.difference(['Unnamed: 0'])]
+    global pima
 
     # Let's remove NaN values according to going out for dates value
-    pima = replace_with_partner(pima, 'go_out')
-    # pima = replace_with_median(pima, 'age')
+    pima = replace_with_partner('go_out')
+    pima = replace_with_partner('age')
+    pima = replace_with_median('prob')
 
-    pima.dropna(inplace=True)
-    X = pima.drop(['match'], axis=1)
+    pima = pima.fillna(0)
+
+    X = pima.drop(['match', 'Unnamed: 0'], axis=1)
     y = pima.match
 
     # Split dataset into training set and test set
@@ -168,32 +157,22 @@ def id3_auto():
     # Predict the response for test dataset
     y_pred = clf.predict(X_test)
 
-    # Model Accuracy, how often is the classifier correct?
-    print("\nGlobal Entropy (match):\t\t\t" + str(entropy(pima)))
-    print("Age frequency Entropy:\t\t\t" + str(entropy_non_bool(pima, 'age')))
-    print("Pair's age frequency Entropy:\t\t" + str(entropy_non_bool(pima, 'age_o')))
-    print("Going out for dates frequency Entropy:\t" + str(entropy_non_bool(pima, 'date')))
-    print("Going out frequency Entropy:\t\t" + str(entropy_non_bool(pima, 'go_out')))
-    print("Liked pair Entropy:\t\t\t" + str(entropy_non_bool(pima, 'like')))
-    print("Pair liked it Entropy:\t\t\t" + str(entropy_non_bool(pima, 'prob')))
     print("\n")
     print("Accuracy (ID3):", metrics.accuracy_score(y_test, y_pred))
-    print("\n")
-    print_table(pima)
-    print("\n")
 
-    ''' descomentar para graph
-    dot_data = StringIO()
-    export_graphviz(clf, out_file=dot_data,
-                    filled=True, rounded=True,
-                    special_characters=True, feature_names = feature_cols,class_names=['0', '1'])
-    graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
-    graph.write_png('id3.png')
-    Image(graph.create_png())
-    '''
+    return pima
 
 
 def gnb_auto():
+    ''' descomentar para graph
+        dot_data = StringIO()
+        export_graphviz(clf, out_file=dot_data,
+                        filled=True, rounded=True,
+                        special_characters=True, feature_names = feature_cols,class_names=['0', '1'])
+        graph = pydotplus.graph_from_dot_data(dot_data.getvalue())
+        graph.write_png('id3.png')
+        Image(graph.create_png())
+        '''
     pima = pandas.read_csv("speedDating_trab.csv")
     pima.head()
     pima.dropna(inplace=True)
@@ -225,5 +204,16 @@ def gnb_auto():
 
 # run script
 if __name__ == '__main__':
-    id3_auto()
+    pima = id3_auto()
+
+    # Model Accuracy, how often is the classifier correct?
+    print("\nGlobal Entropy (match):\t\t\t" + str(entropy()))
+    print("Age frequency Entropy:\t\t\t" + str(entropy_non_bool('age')))
+    print("Pair's age frequency Entropy:\t\t" + str(entropy_non_bool('age_o')))
+    print("Going out for dates frequency Entropy:\t" + str(entropy_non_bool('date')))
+    print("Going out frequency Entropy:\t\t" + str(entropy_non_bool('go_out')))
+    print("Liked pair Entropy:\t\t\t" + str(entropy_non_bool('like')))
+    print("Pair liked it Entropy:\t\t\t" + str(entropy_non_bool('prob')))
+    print("\n")
+    print_table()
     # gnb_auto()
