@@ -8,6 +8,9 @@ verify_ssl = true
 [packages]
 pandas = "*"
 scikit-learn = "*"
+sklearn = "*"
 IPython = "*"
+pydotplus = "*"
+
 [requires]
 python_version = "3.8.5"
