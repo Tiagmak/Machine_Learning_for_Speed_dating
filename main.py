@@ -185,7 +185,7 @@ def going_out_plot():
 def entropy(column, base=None):
     vc = pandas.Series(column).value_counts(normalize=True, sort=False)
     base = e if base is None else base
-    return ((-(vc * np.log(vc) / np.log(base)).sum()) / e) * 100
+    return ((-(vc * np.log(vc) / np.log(base)).sum())) * 100
 
 
 def id3_auto():
@@ -273,13 +273,17 @@ def gnb_auto():
 if __name__ == '__main__':
     pima = id3_auto()
 
+    # Normalize negative values (to correctly calculate entropy)
+    int_corr_n = (pima['int_corr'] + 1) / 2
+
     # Model Accuracy, how often is the classifier correct?
-    print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'])))
-    print("Pair's age frequency Entropy:\t\t" + str(entropy(pima['age_o'])))
-    print("Going out for dates frequency Entropy:\t" + str(entropy(pima['date'])))
-    print("Going out frequency Entropy:\t\t" + str(entropy(pima['go_out'])))
-    print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'])))
-    print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
+    print("Age frequency Entropy:\t\t\t" + "% " + str(entropy(pima['age'], 100)))
+    print("Pair's age frequency Entropy:\t\t" + "% " + str(entropy(pima['age_o'], 100)))
+    print("Going out for dates frequency Entropy:\t" + "% " + str(entropy(pima['date'], 100)))
+    print("Going out frequency Entropy:\t\t" + "% " + str(entropy(pima['go_out'], 100)))
+    print("Liked pair Entropy:\t\t\t" + "% " + str(entropy(pima['like'], 100)))
+    print("Pair liked it Entropy:\t\t\t" + "% " + str(entropy(pima['prob'], 100)))
+    print("Interests correlation:\t\t\t" + "% " + str(entropy(int_corr_n, 100)))
     print("\n")
     print_table()
     # gnb_auto()
