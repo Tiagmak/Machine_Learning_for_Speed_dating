@@ -188,25 +188,29 @@ def gnb_auto():
 
 # run script
 if __name__ == '__main__':
+
+    # standardize
+    pima.std(ddof=0)
+    original_na_dropd = pima.dropna()
+
     # Model Accuracy, how often is the classifier correct?
-    print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'])))
-    print("Pair's age frequency Entropy:\t\t" + str(entropy(pima['age_o'])))
-    print("Going out for dates frequency Entropy:\t" + str(entropy(pima['date'])))
-    print("Going out frequency Entropy:\t\t" + str(entropy(pima['go_out'])))
-    print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'])))
-    print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
-    print("Interests Entropy:\t\t\t" + str(entropy(pima['int_corr'])))
-    print("Length Entropy:\t\t\t\t" + str(entropy(pima['length'])))
-    print("Met Before Entropy:\t\t\t" + str(entropy(pima['met'])))
-    print("Like Entropy:\t\t\t\t" + str(entropy(pima['like'])))
-    print("Prob Entropy:\t\t\t\t" + str(entropy(pima['prob'])))
+    print("Age frequency Entropy:\t\t\t" + str(entropy(original_na_dropd['age'])))
+    print("Pair's age frequency Entropy:\t\t" + str(entropy(original_na_dropd['age_o'])))
+    print("Going out for dates frequency Entropy:\t" + str(entropy(original_na_dropd['date'])))
+    print("Going out frequency Entropy:\t\t" + str(entropy(original_na_dropd['go_out'])))
+    print("Liked pair Entropy:\t\t\t" + str(entropy(original_na_dropd['like'])))
+    print("Pair liked it Entropy:\t\t\t" + str(entropy(original_na_dropd['prob'])))
+    print("Interests Entropy:\t\t\t" + str(entropy(original_na_dropd['int_corr'])))
+    print("Length Entropy:\t\t\t\t" + str(entropy(original_na_dropd['length'])))
+    print("Met Before Entropy:\t\t\t" + str(entropy(original_na_dropd['met'])))
+    print("Like Entropy:\t\t\t\t" + str(entropy(original_na_dropd['like'])))
+    print("Prob Entropy:\t\t\t\t" + str(entropy(original_na_dropd['prob'])))
 
     column_print = input("Name of desired column [press n to skip]: ")
     if column_print != "n":
         gtype = input("Hist | Dens ? [0 .. 1]: ")
         if gtype == "0":
-            pima = pima.dropna()
-            histo.plot_auto(pima[column_print])
+            histo.plot_auto(original_na_dropd[column_print])
         else:
             dens.plot_auto(pima, column_print)
 
