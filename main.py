@@ -54,12 +54,21 @@ def median_pdf(column_name):
     return median(pdf)
 
 
+def replace_with_value(column, value):
+    global pima
+    for index, row in pima.iterrows():
+        if np.isnan(row[column]):
+            row[column] = value
+
+    return pima
+
+
 def replace_with_median(column):
     global pima
     median_n = median_pdf(column)
-    for index, rows in pima.iterrows():
-        if rows[column] == 'NA':
-            pima.rows[column] = median_n
+    for index, row in pima.iterrows():
+        if np.isnan(row[column]):
+            row[column] = median_n
 
     return pima
 
@@ -79,7 +88,7 @@ def eliminate_undefined_no_match(column):
     global pima
     for index, rows in pima.iterrows():
         if rows['match'] == 0:
-            if rows[column] == 'NA':
+            if rows[column] == '':
                 pima = pima.drop([index])
 
     return pima
@@ -98,21 +107,28 @@ def entropy(column, base):
     return -(vc * np.log(vc) / np.log(base)).sum()
 
 
+def remove_na_index_from_col(col):
+    global pima
+    df2 = pima.dropna(subset=[col])
+    pima = pima.drop(df2.index)
+
+
 def id3_auto():
     global pima
 
-    # dens.na_values_data_plot(pima, True)
+    # Let's remove NaN values according to going out for dates value
+    # If age is the same then it shouldn't matter
+    pima = replace_with_partner('age')
+    pima = replace_with_partner('age_o')
+    # least entropy, shouldn't change pdf
+    pima = replace_with_median('length')
+    pima = replace_with_median('met')
+    # entropy is high
+    pima = eliminate_undefined_no_match("int_corr")
+    # "other" is neutral
+    pima = replace_with_value("goal", 6)
 
     remove_na(True)
-    histo.plot_auto(pima['int_corr'])
-    # Let's remove NaN values according to going out for dates value
-    pima = replace_with_partner('go_out')
-
-    # pima = replace_with_partner('age')
-    # pima = replace_with_median('prob')
-    # pima = replace_with_median('age_o')
-
-    # pima = pima.drop('goal', axis=1)
 
     X = pima.drop(['match', 'Unnamed: 0'], axis=1)
     y = pima.match
@@ -191,6 +207,8 @@ if __name__ == '__main__':
     print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'], base)))
     base = len(set(pima['age_o']))
     print("Pair's age frequency Entropy:\t\t" + str(entropy(pima['age_o'], base)))
+    base = len(set(pima['goal']))
+    print("Goal Entropy:\t\t\t\t" + str(entropy(pima['goal'], base)))
     base = len(set(pima['date']))
     print("Going out for dates frequency Entropy:\t" + str(entropy(pima['date'], base)))
     base = len(set(pima['go_out']))
