@@ -1,4 +1,4 @@
-import math
+from math import e
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -23,26 +23,6 @@ def print_table():
         display(pima.head(10))
 
 
-# let's get 1's and 0's for global entropy
-# function for entropy
-def entropy():
-    global pima
-    one = 0
-    zero = 0
-    for index, rows in pima.iterrows():
-        # print(rows['match'])
-        if rows['match'] == 0.0:
-            zero = zero + 1
-        else:
-            one = one + 1
-
-    inside_first = one / (one + zero)
-    inside_second = zero / (one + zero)
-    first_part = -inside_first * math.log2(inside_first)
-    second_part = inside_second * math.log2(inside_second)
-    return first_part - second_part
-
-
 # return median from list
 def median(lst):
     n = len(lst)
@@ -64,7 +44,7 @@ def normal_dist(x, mean, sd):
 # see the "making predictions" chapter in cmu-lecture-22.pdf
 # https://en.wikipedia.org/wiki/Probability_density_function
 # https://en.wikipedia.org/wiki/File:Visualisation_mode_median_mean.svg
-def magic_number(column_name):
+def median_pdf(column_name):
     global pima
     # Calculate mean and Standard deviation.
     mean = np.mean(pima[column_name])
@@ -75,30 +55,9 @@ def magic_number(column_name):
     return median(pdf)
 
 
-def entropy_non_bool(column_name):
-    global pima
-    magic_n = magic_number(column_name)
-
-    n = 0.0
-    p = 0.0
-
-    for n in pima[column_name]:
-        # print(rows['match'])
-        if n <= magic_n:
-            n = n + 1
-        else:
-            p = p + 1
-
-    f = p / (p + n)
-    s = n / (p + n)
-    fp = -f * math.log2(f)
-    sp = s * math.log2(s)
-    return fp - sp
-
-
 def replace_with_median(column):
     global pima
-    median_n = magic_number(column)
+    median_n = median_pdf(column)
     for index, rows in pima.iterrows():
         if rows[column] == 'NA':
             pima.rows[column] = median_n
@@ -222,6 +181,13 @@ def going_out_plot():
     plt.show()
 
 
+# returns entropy percentage
+def entropy(column, base=None):
+    vc = pandas.Series(column).value_counts(normalize=True, sort=False)
+    base = e if base is None else base
+    return ((-(vc * np.log(vc) / np.log(base)).sum()) / e) * 100
+
+
 def id3_auto():
     global pima
 
@@ -308,13 +274,12 @@ if __name__ == '__main__':
     pima = id3_auto()
 
     # Model Accuracy, how often is the classifier correct?
-    print("\nGlobal Entropy (match):\t\t\t" + str(entropy()))
-    print("Age frequency Entropy:\t\t\t" + str(entropy_non_bool('age')))
-    print("Pair's age frequency Entropy:\t\t" + str(entropy_non_bool('age_o')))
-    print("Going out for dates frequency Entropy:\t" + str(entropy_non_bool('date')))
-    print("Going out frequency Entropy:\t\t" + str(entropy_non_bool('go_out')))
-    print("Liked pair Entropy:\t\t\t" + str(entropy_non_bool('like')))
-    print("Pair liked it Entropy:\t\t\t" + str(entropy_non_bool('prob')))
+    print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'])))
+    print("Pair's age frequency Entropy:\t\t" + str(entropy(pima['age_o'])))
+    print("Going out for dates frequency Entropy:\t" + str(entropy(pima['date'])))
+    print("Going out frequency Entropy:\t\t" + str(entropy(pima['go_out'])))
+    print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'])))
+    print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
     print("\n")
     print_table()
     # gnb_auto()
