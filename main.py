@@ -116,20 +116,6 @@ def remove_na_index_from_col(col):
 def id3_auto():
     global pima
 
-    # Let's remove NaN values according to going out for dates value
-    # If age is the same then it shouldn't matter
-    pima = replace_with_partner('age')
-    pima = replace_with_partner('age_o')
-    # least entropy, shouldn't change pdf
-    pima = replace_with_median('length')
-    pima = replace_with_median('met')
-    # entropy is high
-    pima = eliminate_undefined_no_match("int_corr")
-    # "other" is neutral
-    pima = replace_with_value("goal", 6)
-
-    remove_na(True)
-
     X = pima.drop(['match', 'Unnamed: 0'], axis=1)
     y = pima.match
 
@@ -168,11 +154,6 @@ def gnb_auto():
         Image(graph.create_png())
         '''
 
-    # situação
-    # na_values_data_plot(True)
-    # na_values_data_plot(False)
-    remove_na(True)
-
     X = pima.drop(['match', 'Unnamed: 0'], axis=1)
     y = pima.match
 
@@ -199,10 +180,58 @@ def gnb_auto():
     return pima
 
 
+def na_specify():
+    global pima
+    # Let's remove NaN values according to going out for dates value
+    # If age is the same then it shouldn't matter
+    pima = replace_with_partner('age')
+    pima = replace_with_partner('age_o')
+    # least entropy, shouldn't change pdf
+    pima = replace_with_median('length')
+    pima = replace_with_median('met')
+    # entropy is high
+    pima = eliminate_undefined_no_match("int_corr")
+    # "other" is neutral
+    pima = replace_with_value("goal", 6)
+
+    # remove others
+    remove_na(True)
+
+
 # run script
 if __name__ == '__main__':
 
     # Model Accuracy, how often is the classifier correct?
+    base = len(set(pima['age']))
+    print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'], base)))
+    base = len(set(pima['age_o']))
+    print("Pair's age frequency Entropy:\t\t" + str(entropy(pima['age_o'], base)))
+    base = len(set(pima['goal']))
+    print("Goal Entropy:\t\t\t\t" + str(entropy(pima['goal'], base)))
+    base = len(set(pima['date']))
+    print("Going out for dates frequency Entropy:\t" + str(entropy(pima['date'], base)))
+    base = len(set(pima['go_out']))
+    print("Going out frequency Entropy:\t\t" + str(entropy(pima['go_out'], base)))
+    base = len(set(pima['like']))
+    print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'], base)))
+    base = len(set(pima['prob']))
+    print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'], base)))
+    base = len(set(pima['int_corr']))
+    print("Interests Entropy:\t\t\t" + str(entropy(pima['int_corr'], base)))
+    base = len(set(pima['length']))
+    print("Length Entropy:\t\t\t\t" + str(entropy(pima['length'], base)))
+    base = len(set(pima['met']))
+    print("Met Before Entropy:\t\t\t" + str(entropy(pima['met'], base)))
+    base = len(set(pima['like']))
+    print("Like Entropy:\t\t\t\t" + str(entropy(pima['like'], base)))
+    base = len(set(pima['prob']))
+    print("Prob Entropy:\t\t\t\t" + str(entropy(pima['prob'], base)))
+
+    # remove nan values with calculated decisions
+    na_specify()
+
+    # new entropy
+    print("\nEntropy after pre processing")
     base = len(set(pima['age']))
     print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'], base)))
     base = len(set(pima['age_o']))
