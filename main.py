@@ -1,6 +1,6 @@
 import math
 
-# normal stuff
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 from IPython.display import display
@@ -127,15 +127,116 @@ def eliminate_undefined_no_match(column):
     return pima
 
 
+def remove_na(mod):
+    global pima
+    if mod:
+        pima = pima.fillna(0)
+    else:
+        pima = pima.dropna()
+
+
+def na_values_data_plot(mod):
+    global pima
+    copy_df = pima
+
+    ylabel = ""
+    method = ""
+    if mod:
+        ylabel = "Zero'd NA"
+        method = "_zero"
+        copy_df = copy_df.fillna(0)
+    else:
+        ylabel = "Dropped NA"
+        method = "_drop"
+        copy_df = copy_df.dropna()
+
+    copy_df.plot.kde(x="match",
+                     y=["age"])
+    plt.title(ylabel)
+    plt.ylabel("Age \"match\" density")
+    plt.xlabel('Participant\'s age')
+    plt.savefig('plots/na_values_all/age' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["age_o"])
+    plt.title(ylabel)
+    plt.ylabel("Partner's Age \"match\" density")
+    plt.xlabel('Partner\'s Age')
+    plt.savefig('plots/na_values_all/age_o' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["date"])
+    plt.title(ylabel)
+    plt.ylabel("Going out on dates density")
+    plt.xlabel('Dating frequency ID')
+    plt.savefig('plots/na_values_all/date' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["go_out"])
+    plt.title(ylabel)
+    plt.ylabel("Going out on dates density")
+    plt.xlabel('Going out frequency ID')
+    plt.savefig('plots/na_values_all/go_out' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["int_corr"])
+    plt.title(ylabel)
+    plt.ylabel("Interests ratings density")
+    plt.xlabel('Interests rating [-1,1]')
+    plt.savefig('plots/na_values_all/int_corr' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["length"])
+    plt.title(ylabel)
+    plt.ylabel("Date length duration ID density")
+    plt.xlabel('Date length duration ID')
+    plt.savefig('plots/na_values_all/length' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["met"])
+    plt.title(ylabel)
+    plt.ylabel("Met before density")
+    plt.xlabel('Boolean \"met\"')
+    plt.savefig('plots/na_values_all/met' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["like"])
+    plt.title(ylabel)
+    plt.ylabel("Like pair density")
+    plt.xlabel('Rating [0-10]')
+    plt.savefig('plots/na_values_all/like' + method + '.png')
+
+    copy_df.plot.kde(x="match",
+                     y=["prob"])
+    plt.title(ylabel)
+    plt.ylabel("Meeting again density")
+    plt.xlabel('Probability [0-10]')
+    plt.savefig('plots/na_values_all/prob' + method + '.png')
+
+
+def going_out_plot():
+    pima.plot.kde(x="match",
+                  y=["go_out"])
+    plt.title("Going out density correlation with \"match\"")
+    plt.xlabel('Frequency ID')
+    plt.show()
+
+
 def id3_auto():
     global pima
 
+    na_values_data_plot(True)
+    na_values_data_plot(False)
+
+    remove_na(True)
     # Let's remove NaN values according to going out for dates value
     pima = replace_with_partner('go_out')
-    pima = replace_with_partner('age')
-    pima = replace_with_median('prob')
 
-    pima = pima.fillna(0)
+    # pima = replace_with_partner('age')
+    # pima = replace_with_median('prob')
+    # pima = replace_with_median('age_o')
+
+    # pima = pima.drop('goal', axis=1)
 
     X = pima.drop(['match', 'Unnamed: 0'], axis=1)
     y = pima.match
@@ -143,7 +244,7 @@ def id3_auto():
     # Split dataset into training set and test set
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1)
 
-    # cenas
+    # trains
     sc = StandardScaler()
     X_train = sc.fit_transform(X_train)
     X_test = sc.transform(X_test)
