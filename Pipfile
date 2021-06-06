@@ -10,7 +10,7 @@ pandas = "*"
 scikit-learn = "*"
 sklearn = "*"
 IPython = "*"
-matplotlib = "*"
+matplotlib.pyplot = "*"
 pydotplus = "*"
 
 [requires]
