@@ -231,6 +231,7 @@ def id3_auto():
 
 
 def gnb_auto():
+    global pima
     ''' descomentar para graph
         dot_data = StringIO()
         export_graphviz(clf, out_file=dot_data,
@@ -240,12 +241,13 @@ def gnb_auto():
         graph.write_png('id3.png')
         Image(graph.create_png())
         '''
-    pima = pandas.read_csv("speedDating_trab.csv")
-    pima.head()
-    pima.dropna(inplace=True)
-    pima = pima.iloc[1:]
 
-    X = pima.drop(['match'], axis=1)
+    # situação
+    # na_values_data_plot(True)
+    # na_values_data_plot(False)
+    remove_na(True)
+
+    X = pima.drop(['match', 'Unnamed: 0'], axis=1)
     y = pima.match
 
     # Split dataset into training set and test set
@@ -268,6 +270,8 @@ def gnb_auto():
     # Model Accuracy, how often is the classifier correct?
     print("Accuracy (GNB):", metrics.accuracy_score(y_test, y_pred))
 
+    return pima
+
 
 # run script
 if __name__ == '__main__':
@@ -279,9 +283,7 @@ if __name__ == '__main__':
     print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'])))
     print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
     print("Interests correlation:\t\t\t" + str(entropy(pima['prob'])))
-    print("\n")
 
     pima = id3_auto()
+    # pima = gnb_auto()
     print_table()
-
-    # gnb_auto()
