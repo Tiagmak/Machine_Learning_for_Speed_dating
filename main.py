@@ -195,7 +195,11 @@ if __name__ == '__main__':
     print("Going out frequency Entropy:\t\t" + str(entropy(pima['go_out'])))
     print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'])))
     print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
-    print("Interests correlation:\t\t\t" + str(entropy(pima['prob'])))
+    print("Interests Entropy:\t\t\t" + str(entropy(pima['int_corr'])))
+    print("Length Entropy:\t\t\t\t" + str(entropy(pima['length'])))
+    print("Met Before Entropy:\t\t\t" + str(entropy(pima['met'])))
+    print("Like Entropy:\t\t\t\t" + str(entropy(pima['like'])))
+    print("Prob Entropy:\t\t\t\t" + str(entropy(pima['prob'])))
 
     column_print = input("Name of desired column [press n to skip]: ")
     if column_print != "n":
