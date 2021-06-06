@@ -1,6 +1,5 @@
 from math import e
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas
 from IPython.display import display
@@ -9,6 +8,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.naive_bayes import GaussianNB
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
+
+import dens
+import histo
 
 pima = pandas.read_csv("speedDating_trab.csv")
 
@@ -23,7 +25,6 @@ def print_table():
         display(pima.head(10))
 
 
-# return median from list
 def median(lst):
     n = len(lst)
     s = sorted(lst)
@@ -94,94 +95,6 @@ def remove_na(mod):
         pima = pima.dropna()
 
 
-def na_values_data_plot(mod):
-    global pima
-    copy_df = pima
-
-    ylabel = ""
-    method = ""
-    if mod:
-        ylabel = "Zero'd NA"
-        method = "_zero"
-        copy_df = copy_df.fillna(0)
-    else:
-        ylabel = "Dropped NA"
-        method = "_drop"
-        copy_df = copy_df.dropna()
-
-    copy_df.plot.kde(x="match",
-                     y=["age"])
-    plt.title(ylabel)
-    plt.ylabel("Age \"match\" density")
-    plt.xlabel('Participant\'s age')
-    plt.savefig('plots/na_values_all/age' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["age_o"])
-    plt.title(ylabel)
-    plt.ylabel("Partner's Age \"match\" density")
-    plt.xlabel('Partner\'s Age')
-    plt.savefig('plots/na_values_all/age_o' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["date"])
-    plt.title(ylabel)
-    plt.ylabel("Going out on dates density")
-    plt.xlabel('Dating frequency ID')
-    plt.savefig('plots/na_values_all/date' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["go_out"])
-    plt.title(ylabel)
-    plt.ylabel("Going out on dates density")
-    plt.xlabel('Going out frequency ID')
-    plt.savefig('plots/na_values_all/go_out' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["int_corr"])
-    plt.title(ylabel)
-    plt.ylabel("Interests ratings density")
-    plt.xlabel('Interests rating [-1,1]')
-    plt.savefig('plots/na_values_all/int_corr' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["length"])
-    plt.title(ylabel)
-    plt.ylabel("Date length duration ID density")
-    plt.xlabel('Date length duration ID')
-    plt.savefig('plots/na_values_all/length' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["met"])
-    plt.title(ylabel)
-    plt.ylabel("Met before density")
-    plt.xlabel('Boolean \"met\"')
-    plt.savefig('plots/na_values_all/met' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["like"])
-    plt.title(ylabel)
-    plt.ylabel("Like pair density")
-    plt.xlabel('Rating [0-10]')
-    plt.savefig('plots/na_values_all/like' + method + '.png')
-
-    copy_df.plot.kde(x="match",
-                     y=["prob"])
-    plt.title(ylabel)
-    plt.ylabel("Meeting again density")
-    plt.xlabel('Probability [0-10]')
-    plt.savefig('plots/na_values_all/prob' + method + '.png')
-
-
-def going_out_plot():
-    pima.plot.kde(x="match",
-                  y=["go_out"])
-    plt.title("Going out density correlation with \"match\"")
-    plt.xlabel('Frequency ID')
-    plt.show()
-
-
-# returns entropy percentage
 def entropy(column, base=None):
     vc = pandas.Series(column).value_counts(normalize=True, sort=False)
     base = e if base is None else base
@@ -191,10 +104,10 @@ def entropy(column, base=None):
 def id3_auto():
     global pima
 
-    na_values_data_plot(True)
-    na_values_data_plot(False)
+    # dens.na_values_data_plot(pima, True)
 
     remove_na(True)
+    histo.plot_auto(pima['int_corr'])
     # Let's remove NaN values according to going out for dates value
     pima = replace_with_partner('go_out')
 
@@ -284,6 +197,20 @@ if __name__ == '__main__':
     print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
     print("Interests correlation:\t\t\t" + str(entropy(pima['prob'])))
 
-    pima = id3_auto()
-    # pima = gnb_auto()
+    column_print = input("Name of desired column [press n to skip]: ")
+    if column_print != "n":
+        gtype = input("Hist | Dens ? [0 .. 1]: ")
+        if gtype == "0":
+            pima = pima.dropna()
+            histo.plot_auto(pima[column_print])
+        else:
+            dens.plot_auto(pima, column_print)
+
+    algo_print = input("ID3 or GNB? [0 .. 1][press n to skip]: ")
+    if algo_print != "n":
+        if algo_print == "0":
+            pima = id3_auto()
+        else:
+            pima = gnb_auto()
+
     print_table()
