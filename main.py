@@ -280,8 +280,8 @@ if __name__ == '__main__':
     print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'])))
     print("Interests correlation:\t\t\t" + str(entropy(pima['prob'])))
     print("\n")
-    print_table()
 
     pima = id3_auto()
+    print_table()
 
     # gnb_auto()
