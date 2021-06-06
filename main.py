@@ -1,5 +1,3 @@
-from math import e
-
 import numpy as np
 import pandas
 from IPython.display import display
@@ -95,9 +93,8 @@ def remove_na(mod):
         pima = pima.dropna()
 
 
-def entropy(column, base=None):
+def entropy(column, base):
     vc = pandas.Series(column).value_counts(normalize=True, sort=False)
-    base = e if base is None else base
     return -(vc * np.log(vc) / np.log(base)).sum()
 
 
@@ -189,28 +186,35 @@ def gnb_auto():
 # run script
 if __name__ == '__main__':
 
-    # standardize
-    pima.std(ddof=0)
-    original_na_dropd = pima.dropna()
-
     # Model Accuracy, how often is the classifier correct?
-    print("Age frequency Entropy:\t\t\t" + str(entropy(original_na_dropd['age'])))
-    print("Pair's age frequency Entropy:\t\t" + str(entropy(original_na_dropd['age_o'])))
-    print("Going out for dates frequency Entropy:\t" + str(entropy(original_na_dropd['date'])))
-    print("Going out frequency Entropy:\t\t" + str(entropy(original_na_dropd['go_out'])))
-    print("Liked pair Entropy:\t\t\t" + str(entropy(original_na_dropd['like'])))
-    print("Pair liked it Entropy:\t\t\t" + str(entropy(original_na_dropd['prob'])))
-    print("Interests Entropy:\t\t\t" + str(entropy(original_na_dropd['int_corr'])))
-    print("Length Entropy:\t\t\t\t" + str(entropy(original_na_dropd['length'])))
-    print("Met Before Entropy:\t\t\t" + str(entropy(original_na_dropd['met'])))
-    print("Like Entropy:\t\t\t\t" + str(entropy(original_na_dropd['like'])))
-    print("Prob Entropy:\t\t\t\t" + str(entropy(original_na_dropd['prob'])))
+    base = len(set(pima['age']))
+    print("Age frequency Entropy:\t\t\t" + str(entropy(pima['age'], base)))
+    base = len(set(pima['age_o']))
+    print("Pair's age frequency Entropy:\t\t" + str(entropy(pima['age_o'], base)))
+    base = len(set(pima['date']))
+    print("Going out for dates frequency Entropy:\t" + str(entropy(pima['date'], base)))
+    base = len(set(pima['go_out']))
+    print("Going out frequency Entropy:\t\t" + str(entropy(pima['go_out'], base)))
+    base = len(set(pima['like']))
+    print("Liked pair Entropy:\t\t\t" + str(entropy(pima['like'], base)))
+    base = len(set(pima['prob']))
+    print("Pair liked it Entropy:\t\t\t" + str(entropy(pima['prob'], base)))
+    base = len(set(pima['int_corr']))
+    print("Interests Entropy:\t\t\t" + str(entropy(pima['int_corr'], base)))
+    base = len(set(pima['length']))
+    print("Length Entropy:\t\t\t\t" + str(entropy(pima['length'], base)))
+    base = len(set(pima['met']))
+    print("Met Before Entropy:\t\t\t" + str(entropy(pima['met'], base)))
+    base = len(set(pima['like']))
+    print("Like Entropy:\t\t\t\t" + str(entropy(pima['like'], base)))
+    base = len(set(pima['prob']))
+    print("Prob Entropy:\t\t\t\t" + str(entropy(pima['prob'], base)))
 
     column_print = input("Name of desired column [press n to skip]: ")
     if column_print != "n":
         gtype = input("Hist | Dens ? [0 .. 1]: ")
         if gtype == "0":
-            histo.plot_auto(original_na_dropd[column_print])
+            histo.plot_auto(pima[column_print])
         else:
             dens.plot_auto(pima, column_print)
 
